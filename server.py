@@ -3,12 +3,13 @@ from SocketServer import TCPServer, BaseRequestHandler
 class handler(BaseRequestHandler):
     def mostrar(self):
         for i in range(0,3):
-            msg=str(self.db["nombre"][i])+'\t\t\t\t\t\t'+str(self.db["precio"][i])+'\n'
+            msg=str(self.db["nombre"][i])+'\t\t'+'cod: '+ str(self.db["codigo"][i])+'\t\t'+str(self.db["precio"][i])+ '\t\t'+str(self.db["cantidad"][i])+' und' +'\n'
             self.request.send(msg)
     def handle(self):
         self.db={"nombre":['Aguardiente','Ron','Whiskey'],
+                "codigo":[1,2,3],
                     "precio":[22000,37000,60000],
-                    "Cantidad":[5,5,5]}
+                    "cantidad":[5,5,5]}
         print "Connection from ",(self.client_address)
         bienvenida= "Bienvenido a LiquoStore, para nosotros es un gusto atenderlo\n"
         self.request.send(bienvenida)
@@ -23,6 +24,8 @@ class handler(BaseRequestHandler):
                 self.mostrar()
             elif datos=="COMPRAR\r\n":
                 self.comprar()
+            else:
+                self.request.send("Lo sentimos, la opcion es invalida\n")
         self.request.close()
     def opciones(self):
         self.request.send("1)MOSTRAR: para mostrar el catalogo de licores disponibles\n")
@@ -35,10 +38,15 @@ class handler(BaseRequestHandler):
         opcion=int(self.request.recv(8))
         if opcion==1:
             self.request.send("Tenga su "+self.db["nombre"][0]+'\n')
+            self.actualizar(0)
         elif opcion==2:
             self.request.send("Tenga su "+self.db["nombre"][1]+'\n')
+            self.actualizar(1)
         elif opcion==3:
             self.request.send("Tenga su "+self.db["nombre"][2]+'\n')
+            self.actualizar(2)
+    def actualizar(self,n):
+        self.db["cantidad"][n]=self.db["cantidad"][n]-1
 
 
 class MyEchoServer(): 
