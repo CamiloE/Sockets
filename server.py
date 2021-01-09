@@ -1,4 +1,4 @@
-from SocketServer import TCPServer, BaseRequestHandler
+from SocketServer import ThreadingTCPServer, BaseRequestHandler
 
 class handler(BaseRequestHandler):
     def mostrar(self):
@@ -10,6 +10,7 @@ class handler(BaseRequestHandler):
                 "codigo":[1,2,3],
                     "precio":[22000,37000,60000],
                     "cantidad":[5,5,5]}
+        user_list.append(self.client_address)
         print "Connection from ",(self.client_address)
         bienvenida= "Bienvenido a LiquoStore, para nosotros es un gusto atenderlo\n"
         self.request.send(bienvenida)
@@ -19,11 +20,14 @@ class handler(BaseRequestHandler):
         while True:
             datos= self.request.recv(1024)
             if datos == "SALIR\r\n":
+                user_list.remove(self.client_address)
                 break
             elif datos=='MOSTRAR\r\n':
                 self.mostrar()
             elif datos=="COMPRAR\r\n":
                 self.comprar()
+            elif datos=="USUARIOS\r\n":
+                self.usuarios_conectados()
             else:
                 self.request.send("Lo sentimos, la opcion es invalida\n")
         self.request.close()
@@ -31,6 +35,7 @@ class handler(BaseRequestHandler):
         self.request.send("1)MOSTRAR: para mostrar el catalogo de licores disponibles\n")
         self.request.send("2)COMPRAR: para comprar un solo licor\n")
         self.request.send("3)SALIR: para desconectarse del servidor\n")
+        self.request.send("4)USUARIOS: para mostrar los usuarios conectados\n")
     def comprar(self):
         self.request.send("1) Aguardiente\n")
         self.request.send("2) Ron\n")
@@ -47,16 +52,20 @@ class handler(BaseRequestHandler):
             self.actualizar(2)
     def actualizar(self,n):
         self.db["cantidad"][n]=self.db["cantidad"][n]-1
+    def usuarios_conectados(self):
+        for user in user_list:
+            self.request.send(str(user)+'\n')
 
 
 class MyEchoServer(): 
     def __init__(self,ip,port):
         self.ip=ip
         self.port=port
-        self.server=TCPServer((self.ip,self.port),handler)
+        self.server=ThreadingTCPServer((self.ip,self.port),handler)
     def start(self):
         print "Waiting connection..."
         self.server.serve_forever()
 
+user_list=[]
 servidor=MyEchoServer("127.0.0.1",1234)
 servidor.start()
