@@ -1,7 +1,7 @@
 from socket import *
 from threading import *
 
-class MiBanco:
+class MiLicorera:
     def __init__(self, ip, puerto):
         self.ip=ip 
         self.puerto=puerto
@@ -59,20 +59,32 @@ class MiBanco:
         conn.send("3) Whiskey\n")
         opcion=int(conn.recv(8))
         if opcion==1:
-            conn.send("Tenga su "+self.db["nombre"][0]+'\n')
-            self.actualizar(0)
+            ans=self.conectar_banco()
+            if ans=="ACEPTADO":
+                conn.send("Tenga su "+self.db["nombre"][0]+'\n')
+                self.actualizar(0)
         elif opcion==2:
-            conn.send("Tenga su "+self.db["nombre"][1]+'\n')
-            self.actualizar(1)
+            ans=self.conectar_banco()
+            if ans=="ACEPTADO":
+                conn.send("Tenga su "+self.db["nombre"][1]+'\n')
+                self.actualizar(1)
         elif opcion==3:
-            conn.send("Tenga su "+self.db["nombre"][2]+'\n')
-            self.actualizar(2)
+            ans=self.conectar_banco()
+            if ans=="ACEPTADO":
+                conn.send("Tenga su "+self.db["nombre"][2]+'\n')
+                self.actualizar(2)
     def actualizar(self,n):
         self.db["cantidad"][n]=self.db["cantidad"][n]-1
     def usuarios_conectados(self,conn):
         for user in user_list:
-            conn.send(str(user)+'\n') 
+            conn.send(str(user)+'\n')
+    def conectar_banco(self):
+        c=socket(AF_INET,SOCK_DGRAM)
+        c.sendto("PAGAR",("127.0.0.1",5050))
+        ans, remoto=c.recvfrom(1024)
+        c.close()
+        return ans 
 
 user_list=[]
-banco=MiBanco("127.0.0.1",1234)
-banco.start()
+licorera=MiLicorera("127.0.0.1",1234)
+licorera.start()
