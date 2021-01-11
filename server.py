@@ -14,23 +14,24 @@ class MiLicorera:
         bienvenida= "Bienvenido a LiquoStore, para nosotros es un gusto atenderlo\n"
         conn.send(bienvenida)
         conn.send("\t\tLas opciones para interactuar con nosotros son las siguientes\n")
-        conn.send("\n")
         self.opciones(conn)
         conectado=True
         while conectado:
             datos=conn.recv(1024)
-            if datos=="SALIR\r\n":
+            print datos
+            if datos=="SALIR":
                 user_list.remove(add)
-                conn.close()
+                #conn.close()
                 break
-            elif datos=="MOSTRAR\r\n":
+            elif datos=="MOSTRAR":
                 self.mostrar(conn)
-            elif datos=="COMPRAR\r\n":
+            elif datos=="COMPRAR":
                 self.comprar(conn)
-            elif datos=="USUARIOS\r\n":
+            elif datos=="USUARIOS":
                 self.usuarios_conectados(conn)
             else:
                 conn.send("Lo sentimos, la opcion no esta disponible")
+        conn.close()
     def start(self):#Funcion para iniciar el servidor
         self.tcpserver.bind((self.ip,self.puerto))#Asignacion de la IP y del Puerto
         self.tcpserver.listen(5)#Escucha conexiones
@@ -45,19 +46,24 @@ class MiLicorera:
         self.tcpserver.stop()
         print "Servidor Desconectado..."
     def opciones(self,conn):#Muestra al usuario las opciones disponibles para interactuar con el servidor
+        menu="1)MOSTRAR: para mostrar el catalogo de licores disponibles\n"+"2)COMPRAR: para comprar un solo licor\n"+"3)USUARIOS: para mostrar los usuarios conectados\n"+"4)SALIR: para desconectarse del servidor\n"
+        '''
         conn.send("1)MOSTRAR: para mostrar el catalogo de licores disponibles\n")
         conn.send("2)COMPRAR: para comprar un solo licor\n")
         conn.send("3)USUARIOS: para mostrar los usuarios conectados\n")
         conn.send("4)SALIR: para desconectarse del servidor\n")
+        '''
+        conn.send(menu)
     def mostrar(self,conn):#Muestra la informacion de los licores
         for i in range(0,3):
             msg=str(self.db["nombre"][i])+'\t\t'+'cod: '+ str(self.db["codigo"][i])+'\t\t'+str(self.db["precio"][i])+ '\t\t'+str(self.db["cantidad"][i])+' und' +'\n'
             conn.send(msg)
     def comprar(self,conn):#Realiza la compra del licor
         #Envia las opciones de trago disponible
-        conn.send("1) Aguardiente\n")
-        conn.send("2) Ron\n")
-        conn.send("3) Whiskey\n")
+        menu="1) Aguardiente\n"+"2) Ron\n"+"3) Whiskey\n"
+        #conn.send("1) Aguardiente\n")
+        #conn.send("2) Ron\n")
+        conn.send(menu)
         opcion=int(conn.recv(8))#Recibe la opcion seleccionada por el usuario
         if opcion==1:
             ans=self.conectar_banco()#Realizar la conexion con el banco para el pago
