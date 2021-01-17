@@ -47,5 +47,5 @@ class Cliente:
         data=self.c.recv(1024)
         print data
 
-camilo=Cliente("Camilo")
+camilo=Cliente("Alexandra")
 camilo.conectar_licorera()

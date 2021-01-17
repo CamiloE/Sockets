@@ -21,7 +21,9 @@ class MiLicorera:
             datos=conn.recv(1024)
             print datos
             if datos=="SALIR":
-                user_list.remove(add)
+                index=dir_user.index(add)
+                user_list.pop(index)
+                dir_user.remove(add)
                 #conn.close()
                 break
             elif datos=="MOSTRAR":
@@ -39,8 +41,10 @@ class MiLicorera:
         print "Esperando conexion"
         while True:
             conn,add=self.tcpserver.accept()#Acepta la conexion de un usuario
-            print "Conexion desde ",add 
-            user_list.append(add)#Agrega el usuario a una lista
+            print "Conexion desde ",add
+            name = str(conn.recv(1024))
+            dir_user.append(add) 
+            user_list.append(name)#Agrega el usuario a una lista
             thread=Thread(target=self.handle,args=(conn,add)) #Crea los subprocesos para los multiples clientes
             thread.start()#Inicia el hilo
     def stop(self):#Funcion para detener el servidor
@@ -48,12 +52,6 @@ class MiLicorera:
         print "Servidor Desconectado..."
     def opciones(self,conn):#Muestra al usuario las opciones disponibles para interactuar con el servidor
         menu="1)MOSTRAR: para mostrar el catalogo de licores disponibles\n"+"2)COMPRAR: para comprar un solo licor\n"+"3)USUARIOS: para mostrar los usuarios conectados\n"+"4)SALIR: para desconectarse del servidor\n"
-        '''
-        conn.send("1)MOSTRAR: para mostrar el catalogo de licores disponibles\n")
-        conn.send("2)COMPRAR: para comprar un solo licor\n")
-        conn.send("3)USUARIOS: para mostrar los usuarios conectados\n")
-        conn.send("4)SALIR: para desconectarse del servidor\n")
-        '''
         conn.send(menu)
     def mostrar(self,conn):#Muestra la informacion de los licores
         for i in range(0,5):
@@ -92,8 +90,10 @@ class MiLicorera:
     def actualizar(self,n):
         self.db["cantidad"][n]=self.db["cantidad"][n]-1#Actualiza la cantidad de licores en la base de datos
     def usuarios_conectados(self,conn):#Envia al usuario la lista de los usuarios conectados
+        lista=""
         for user in user_list:
-            conn.send(str(user)+'\n')
+            lista=lista+"-> "+user+"\n"
+        conn.send(lista)
     def conectar_banco(self):
         c=socket(AF_INET,SOCK_DGRAM)#Crea una conexion UDP para realizar el pago con el banco
         c.sendto("PAGAR",("127.0.0.1",5050))
@@ -102,5 +102,6 @@ class MiLicorera:
         return ans 
 
 user_list=[]#Lista con los usuarios conectados
+dir_user=[]
 licorera=MiLicorera("127.0.0.1",1234)
 licorera.start()
