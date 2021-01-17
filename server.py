@@ -5,10 +5,11 @@ class MiLicorera:
     def __init__(self, ip, puerto):
         self.ip=ip 
         self.puerto=puerto
-        self.db={"nombre":['Aguardiente','Ron','Whiskey'],
-                "codigo":[1,2,3],
-                    "precio":[22000,37000,60000],
-                    "cantidad":[5,5,5]}#Base de datos con la informacion de los licores
+        self.db={"nombre":['Aguardiente','Ron','Whiskey','Vino Tinto','Vodka'],
+                "codigo":[1,2,3,4,5],
+                    "precio":[40000,80000,125000,95000,65000],
+                    "cantidad":[5,5,5,5,5],
+                    "procedencia":["Colombia","Colombia","Escocia","Chile","Rusia"]}#Base de datos con la informacion de los licores
         self.tcpserver=socket(AF_INET,SOCK_STREAM)#Creacion de un servidor TCP 
     def handle(self,conn,add):#Funcion del manejador de las solicitudes de los clientes
         bienvenida= "Bienvenido a LiquoStore, para nosotros es un gusto atenderlo\n"
@@ -55,14 +56,12 @@ class MiLicorera:
         '''
         conn.send(menu)
     def mostrar(self,conn):#Muestra la informacion de los licores
-        for i in range(0,3):
-            msg=str(self.db["nombre"][i])+'\t\t'+'cod: '+ str(self.db["codigo"][i])+'\t\t'+str(self.db["precio"][i])+ '\t\t'+str(self.db["cantidad"][i])+' und' +'\n'
+        for i in range(0,5):
+            msg=str(self.db["nombre"][i])+'\t\t'+'cod: '+ str(self.db["codigo"][i])+'\t\t'+str(self.db["precio"][i])+ '\t\t'+str(self.db["cantidad"][i])+' und' +"\t\t"+ str(self.db["procedencia"][i])+'\n'
             conn.send(msg)
     def comprar(self,conn):#Realiza la compra del licor
         #Envia las opciones de trago disponible
-        menu="1) Aguardiente\n"+"2) Ron\n"+"3) Whiskey\n"
-        #conn.send("1) Aguardiente\n")
-        #conn.send("2) Ron\n")
+        menu="1) Aguardiente\n"+"2) Ron\n"+"3) Whiskey\n"+"4) Vino Tinto \n"+"5) Vodka\n"
         conn.send(menu)
         opcion=int(conn.recv(8))#Recibe la opcion seleccionada por el usuario
         if opcion==1:
@@ -80,6 +79,16 @@ class MiLicorera:
             if ans=="ACEPTADO":
                 conn.send("Tenga su "+self.db["nombre"][2]+'\n')#Entrega el licor correspondiente
                 self.actualizar(2)#Actualiza la cantidad de licores en la base de datos
+        elif opcion==4:
+            ans=self.conectar_banco()#Realizar la conexion con el banco para el pago
+            if ans=="ACEPTADO":
+                conn.send("Tenga su "+self.db["nombre"][3]+'\n')#Entrega el licor correspondiente
+                self.actualizar(3)#Actualiza la cantidad de licores en la base de datos
+        elif opcion==5:
+            ans=self.conectar_banco()#Realizar la conexion con el banco para el pago
+            if ans=="ACEPTADO":
+                conn.send("Tenga su "+self.db["nombre"][4]+'\n')#Entrega el licor correspondiente
+                self.actualizar(4)#Actualiza la cantidad de licores en la base de datos
     def actualizar(self,n):
         self.db["cantidad"][n]=self.db["cantidad"][n]-1#Actualiza la cantidad de licores en la base de datos
     def usuarios_conectados(self,conn):#Envia al usuario la lista de los usuarios conectados
