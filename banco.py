@@ -15,25 +15,26 @@ class Banco:
         self.udpserver.bind((self.ip,5050))
         #
         print "Esperando conexion..."
-        thread=Thread(target=self.tcp_handler)
-        thread.start()
-        thread2=Thread(target=self.udp_handler)
-        thread2.start()
-    def tcp_handler(self):
-        print "entra al tcp"
+        #thread2=Thread(target=self.udp_handler)
+        #thread2.start()
         while True:
+            thread2=Thread(target=self.udp_handler)
+            thread2.start()
             self.tcpserver.listen(5)
-            conn, add=self.tcpserver.accept()
+            conn,add=self.tcpserver.accept()#Acepta la conexion de un usuario
             print "Conexion desde ",add
-            conn.send("Bienvenido a su banco, a continuacion se mostrara las opciones\n para que ingrese el numero correspondiente")
-            self.opciones(conn)
-        #while True:
+            thread=Thread(target=self.tcp_handler,args=(conn,add)) #Crea los subprocesos para los multiples clientes
+            thread.start()
+    def tcp_handler(self,conn,add):
+        conn.send("Bienvenido")
     def udp_handler(self):
         print "Entra al udp"
         while True:
             data,remote_host = self.udpserver.recvfrom(1024)
             print data
             print remote_host
+            add,p=remote_host
+            self.udpserver.sendto("respuesta udp a"+str(p),remote_host)
     def opciones(self,conn):
         menu="1) Consultar saldo\n"+"2) Retirar\n"+"3) Consignar\n"+"4) Salir\n"
         conn.send(menu)
