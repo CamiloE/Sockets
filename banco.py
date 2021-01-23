@@ -7,7 +7,7 @@ class Banco:
         self.puerto=puerto
         self.db={"Nombres":["Camilo","Alexandra"],
         "NoCuenta":["1111","2222"],
-        "Contrasenas":["pass1","pass2"]}
+        "Contrasenas":["pass1","pass2"], "Saldo" : [500000,500000]}
         self.tcpserver=socket(AF_INET,SOCK_STREAM)
         self.udpserver=socket(AF_INET,SOCK_DGRAM)
     def start(self):
