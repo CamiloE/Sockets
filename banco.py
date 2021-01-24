@@ -1,5 +1,6 @@
 from socket import *
 from threading import *
+import os
 
 class Banco:
     def __init__(self, ip,puerto):
@@ -13,15 +14,15 @@ class Banco:
         self.tcpserver=socket(AF_INET,SOCK_STREAM)
         self.udpserver=socket(AF_INET,SOCK_DGRAM)
     def start(self):
-        self.tcpserver.bind((self.ip,self.puerto))
-        self.udpserver.bind((self.ip,5050))
-        #
+        try:
+            self.tcpserver.bind((self.ip,self.puerto))
+            #self.tcpserver.listen(5)
+        except:
+            print "puerto ocupado o INBOX equivocado"
+            self.tcpserver.close()
+            os._exit(0)       #
         print "Esperando conexion..."
-        #thread2=Thread(target=self.udp_handler)
-        #thread2.start()
         while True:
-            thread2=Thread(target=self.udp_handler)
-            thread2.start()
             self.tcpserver.listen(5)
             conn,add=self.tcpserver.accept()#Acepta la conexion de un usuario
             print "Conexion desde ",add
@@ -29,10 +30,15 @@ class Banco:
             thread.start()
 
     def tcp_handler(self,conn,add):
+        #self.tcpserver.listen(5)
+        #conn,add=self.tcpserver.accept()#Acepta la conexion de un usuario
+        #print "Conexion desde ",add
         bienvenida= "Bienvenido a su Banco, para nosotros es un gusto atenderlo\n"
         conn.send(bienvenida)
         self.autenticacion (conn,add)
         conn.send("\t\tLas opciones para interactuar con nosotros son las siguientes\n")
+        ok=conn.recv(50)
+        print ok
         self.opciones(conn)
         while True:
             datos=conn.recv(1024)
@@ -47,10 +53,18 @@ class Banco:
                 self.consignar(conn,add)
             else:
                 conn.send("Lo sentimos, la opcion no esta disponible")
+        print "Cerrando conexion"
         conn.close()
 
     def udp_handler(self):
         print "Entra al udp"
+        try:
+            self.udpserver.bind((self.ip,5050))
+        except:
+            print "puerto ocupado o INBOX equivocado"
+            self.udpserver.close()
+            os._exit(0)
+        #print "Entra al udp"
         while True:
             data,remote_host = self.udpserver.recvfrom(1024)
             print data
@@ -60,16 +74,23 @@ class Banco:
 
     def autenticacion(self,conn,add):
         conn.send("Ingrese Usuario")
-        usuario=conn.recv(1024)
+        usuario=str(conn.recv(1024))
+        print usuario
         if usuario in self.db["Nombres"]:
+            print "entro al if"
             self.index= self.db["Nombres"].index(usuario)
             dir_user.append(add)
             user_list.append(usuario)
-            conn.send("Usuario Valido")
-            conn.send("Ingrese la contrasena")
+            conn.send("Usuario Valido\n")
+            ok=conn.recv(30)
+            print ok
+            conn.send("Ingrese la contrasena\n")
             contrasena= conn.recv(1024)
+            print contrasena
             if contrasena == self.db["Contrasenas"][self.index]:
                 conn.send("Ingreso Exitoso")
+                ok=conn.recv(40)
+                print ok
             else:
                 conn.send("Contrasena no Valida...cerrando conexion")
                 conn.close()   
@@ -80,7 +101,7 @@ class Banco:
 
 
     def opciones(self,conn):#Muestra al usuario las opciones disponibles para interactuar con el Banco
-        menu="1)SALDO: para conocer su saldo disponible \n"+"2)RETIRAR: para retirar dinero de su cuenta\n"+"3)CONSIGNAR: para retirar dinero de su cuenta\n"+"4)SALIR: para desconectarse del banco\n"
+        menu="1)SALDO: para conocer su saldo disponible\n"+"2)RETIRAR: para retirar dinero de su cuenta\n"+"3)CONSIGNAR: para retirar dinero de su cuenta\n"+"4)SALIR: para desconectarse del banco\n"
         conn.send(menu)   
     
     def saldo(self,conn,add):
@@ -118,5 +139,6 @@ class Banco:
 user_list=[]
 dir_user=[]
 banco=Banco("127.0.0.1",6789)
+thread1=Thread(target=banco.udp_handler,args=())
+thread1.start()
 banco.start()
-     
