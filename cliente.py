@@ -129,7 +129,7 @@ class Cliente:
         print ans2
 
 '''Inicializacion del codigo'''
-camilo=Cliente("Camilo")
+camilo=Cliente("camilo")
 print "Hola, las opciones son las siguientes: "
 while True:
     print "1) Conectar con la licorera"

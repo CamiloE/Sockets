@@ -1,15 +1,17 @@
 from socket import *
 from threading import *
 import os
+import string
 
 class Banco:
     def __init__(self, ip,puerto):
         self.ip=ip
         self.puerto=puerto
-        self.db={"Nombres":["Camilo","Alexandra","Andres"],
+        self.db={"Nombres":["camilo","alexandra","andres"],
         "NoCuenta":["1111","2222", "3333"],
         "Contrasenas":["pass1","pass2","pass3"], 
-        "Saldo" : [500000,500000,500000]}
+        "Saldo" : [10000,500000,500000]}
+        self.ban=False
 
         self.tcpserver=socket(AF_INET,SOCK_STREAM)
         self.udpserver=socket(AF_INET,SOCK_DGRAM)
@@ -30,17 +32,15 @@ class Banco:
             thread.start()
 
     def tcp_handler(self,conn,add):
-        #self.tcpserver.listen(5)
-        #conn,add=self.tcpserver.accept()#Acepta la conexion de un usuario
-        #print "Conexion desde ",add
         bienvenida= "Bienvenido a su Banco, para nosotros es un gusto atenderlo\n"
         conn.send(bienvenida)
         self.autenticacion (conn,add)
-        conn.send("\t\tLas opciones para interactuar con nosotros son las siguientes\n")
-        ok=conn.recv(50)
-        print ok
-        self.opciones(conn)
-        while True:
+        if self.ban==True:
+            conn.send("\t\tLas opciones para interactuar con nosotros son las siguientes\n")
+            ok=conn.recv(50)
+            print ok
+            self.opciones(conn)
+        while self.ban:
             datos=conn.recv(1024)
             print datos
             if datos=="SALIR":
@@ -68,9 +68,13 @@ class Banco:
         while True:
             data,remote_host = self.udpserver.recvfrom(1024)
             print data
-            print remote_host
-            add,p=remote_host
-            self.udpserver.sendto("respuesta udp a"+str(p),remote_host)
+            cifrado1=data.split(":")[0]
+            cifrado2=data.split(":")[1]
+            name=self.decifrado_letras(cifrado1,-5)
+            vlr=self.decifrado_numeros(cifrado2,-5)
+            #print name+":"+vlr
+            ans=self.debitar(name,int(vlr))
+            self.udpserver.sendto(ans,remote_host)
 
     def autenticacion(self,conn,add):
         conn.send("Ingrese Usuario")
@@ -91,13 +95,16 @@ class Banco:
                 conn.send("Ingreso Exitoso")
                 ok=conn.recv(40)
                 print ok
+                self.ban=True
             else:
                 conn.send("Contrasena no Valida...cerrando conexion")
-                conn.close()   
+                #conn.close()
+                self.ban=False   
 
         else:
             conn.send("Usuario no valido...cerrando conexion")
-            conn.close()
+            #conn.close()
+            self.ban=False
 
 
     def opciones(self,conn):#Muestra al usuario las opciones disponibles para interactuar con el Banco
@@ -134,6 +141,23 @@ class Banco:
         else:
             self.db["Saldo"][i2] =  self.db["Saldo"][i2] + consig
             conn.send("Dinero consignado")
+    def decifrado_letras(self,text,n):
+        intab=string.ascii_lowercase
+        outrab = intab[ n % 26:] + intab[:n%26]
+        trantab = string.maketrans(intab,outrab)
+        return text.translate(trantab)
+    def decifrado_numeros(self,text,n):
+        intab=string.digits
+        outrab = intab[ n % 10:] + intab[:n%10]
+        trantab = string.maketrans(intab,outrab)
+        return text.translate(trantab)
+    def debitar(self,name,vlr):
+        i=self.db["Nombres"].index(name)
+        if self.db["Saldo"][i]>=vlr:
+            self.db["Saldo"][i]=self.db["Saldo"][i]-vlr
+            return "ACEPTADO"
+        else:
+            return "ERROR"
 
 
 user_list=[]
