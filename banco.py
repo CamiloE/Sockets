@@ -10,7 +10,7 @@ class Banco:
         self.db={"Nombres":["camilo","alexandra","andres"],
         "NoCuenta":["1111","2222", "3333"],
         "Contrasenas":["pass1","pass2","pass3"], 
-        "Saldo" : [10000,500000,500000]}
+        "Saldo" : [405000,405000,405000]}
         self.ban=False
 
         self.tcpserver=socket(AF_INET,SOCK_STREAM)
@@ -57,7 +57,6 @@ class Banco:
         conn.close()
 
     def udp_handler(self):
-        print "Entra al udp"
         try:
             self.udpserver.bind((self.ip,5050))
         except:
@@ -98,12 +97,10 @@ class Banco:
                 self.ban=True
             else:
                 conn.send("Contrasena no Valida...cerrando conexion")
-                #conn.close()
                 self.ban=False   
 
         else:
             conn.send("Usuario no valido...cerrando conexion")
-            #conn.close()
             self.ban=False
 
 

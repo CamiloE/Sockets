@@ -130,13 +130,14 @@ class Cliente:
         print ans2
 
 '''Inicializacion del codigo'''
-alexandra=Cliente("alexandra")
+andres=Cliente("andres")
 print "Hola, las opciones son las siguientes: "
 while True:
     print "1) Conectar con la licorera"
     print "2) Conectar con el banco"
     opcion=int(input("Ingrese el numero de la opcion deseada: "))
     if opcion==1:
-        alexandra.conectar_licorera()
+        andres.conectar_licorera()
     elif opcion==2:
-        alexandra.conectar_banco()
+        andres.conectar_banco()
+        

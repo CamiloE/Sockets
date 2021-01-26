@@ -1,4 +1,5 @@
 from socket import *
+from art import *
 
 class Cliente:
     '''Inicializa el cliente con el nombre y el socket para hacer las conexiones'''
@@ -45,7 +46,10 @@ class Cliente:
         opcion=input("Seleccione una opcion: ")
         self.c.send(opcion)
         ans=self.c.recv(1024)
-        print ans
+        if ans=="ERROR EN EL PAGO, SALDO INSUFICIENTE":
+            print ans
+        else:
+            tprint(ans)
     '''Metodo para realizar la consulta a la licorera de los usuarios conectados'''
     def consultar_usuarios(self,opcion):
         self.c.send(opcion)
@@ -62,9 +66,7 @@ class Cliente:
         self.c.send(str(user))
         res1=self.c.recv(1024)
         self.c.send("OK")
-        print "res1"
         print res1
-        print "--------------------"
         if res1=="Usuario Valido\n":
             tercero=self.c.recv(1024)
             print tercero
@@ -73,7 +75,6 @@ class Cliente:
             conf=self.c.recv(52)
             if conf=="Ingreso Exitoso":
                 self.c.send("OK")
-                print "if passw"
                 print conf
                 conectado=True
                 print conectado

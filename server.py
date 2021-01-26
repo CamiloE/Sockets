@@ -66,35 +66,35 @@ class MiLicorera:
         if opcion==1:
             ans=self.conectar_banco(add,self.db["precio"][0])#Realizar la conexion con el banco para el pago
             if ans=="ACEPTADO":
-                conn.send("Tenga su "+self.db["nombre"][0]+'\n')#Entrega el licor correspondiente
+                conn.send(self.db["nombre"][0]+'\n')#Entrega el licor correspondiente
                 self.actualizar(0)#Actualiza la cantidad de licores en la base de datos
             else:
                 conn.send("ERROR EN EL PAGO, SALDO INSUFICIENTE")
         elif opcion==2:
             ans=self.conectar_banco(add,self.db["precio"][1])#Realizar la conexion con el banco para el pago
             if ans=="ACEPTADO":
-                conn.send("Tenga su "+self.db["nombre"][1]+'\n')#Entrega el licor correspondiente
+                conn.send(+self.db["nombre"][1]+'\n')#Entrega el licor correspondiente
                 self.actualizar(1)#Actualiza la cantidad de licores en la base de datos
             else:
                 conn.send("ERROR EN EL PAGO, SALDO INSUFICIENTE")
         elif opcion==3:
             ans=self.conectar_banco(add,self.db["precio"][2])#Realizar la conexion con el banco para el pago
             if ans=="ACEPTADO":
-                conn.send("Tenga su "+self.db["nombre"][2]+'\n')#Entrega el licor correspondiente
+                conn.send(self.db["nombre"][2]+'\n')#Entrega el licor correspondiente
                 self.actualizar(2)#Actualiza la cantidad de licores en la base de datos
             else:
                 conn.send("ERROR EN EL PAGO, SALDO INSUFICIENTE")
         elif opcion==4:
             ans=self.conectar_banco(add,self.db["precio"][3])#Realizar la conexion con el banco para el pago
             if ans=="ACEPTADO":
-                conn.send("Tenga su "+self.db["nombre"][3]+'\n')#Entrega el licor correspondiente
+                conn.send(self.db["nombre"][3]+'\n')#Entrega el licor correspondiente
                 self.actualizar(3)#Actualiza la cantidad de licores en la base de datos
             else:
                 conn.send("ERROR EN EL PAGO, SALDO INSUFICIENTE")
         elif opcion==5:
             ans=self.conectar_banco(add,self.db["precio"][1])#Realizar la conexion con el banco para el pago
             if ans=="ACEPTADO":
-                conn.send("Tenga su "+self.db["nombre"][4]+'\n')#Entrega el licor correspondiente
+                conn.send(self.db["nombre"][4]+'\n')#Entrega el licor correspondiente
                 self.actualizar(4)#Actualiza la cantidad de licores en la base de datos
             else:
                 conn.send("ERROR EN EL PAGO, SALDO INSUFICIENTE")
