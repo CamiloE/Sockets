@@ -10,7 +10,7 @@ class Cliente:
     y recibir del teclado las opciones del usuario'''
     def conectar_licorera(self):#funcion para conectarse a la licorera
         self.c=socket(AF_INET,SOCK_STREAM)
-        self.c.connect(("127.0.0.1",1234))
+        self.c.connect(("10.20.30.2",1234))
         self.c.send(self.nombre)
         bienvenida=self.c.recv(1024)
         print bienvenida
@@ -59,7 +59,7 @@ class Cliente:
         print data
     def conectar_banco(self):#FUncion para conectarce al  banco
         self.c=socket(AF_INET,SOCK_STREAM)
-        self.c.connect(("127.0.0.1",6789))
+        self.c.connect(("10.20.30.3",6789))
         bienvenida=self.c.recv(1024)
         print bienvenida
         self.c.send("OK")

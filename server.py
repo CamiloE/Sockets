@@ -117,7 +117,7 @@ class MiLicorera:
         cifrado2=self.cifrado_numeros(vlr,5) #cifra el precio
         req=cifrado1+":"+cifrado2
         print req
-        c.sendto(req,("127.0.0.1",5050)) #envia el cifrado al banco
+        c.sendto(req,("10.20.30.3",5050)) #envia el cifrado al banco
         ans, remoto=c.recvfrom(1024)#Recibe la respuesta del banco
         c.close()#Cierra la conexion con el banco
         return ans #retorna la respuesta del banco
@@ -134,5 +134,5 @@ class MiLicorera:
 
 user_list=[]#Lista con los usuarios conectados
 dir_user=[]#lista con las ips y puertos del cliente.
-licorera=MiLicorera("127.0.0.1",1234)
+licorera=MiLicorera("10.20.30.2",1234)
 licorera.start()

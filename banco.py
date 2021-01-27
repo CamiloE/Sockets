@@ -158,7 +158,7 @@ class Banco:
 
 user_list=[] #lista de usuarios conectados
 dir_user=[] #lista con ip y puerto de los usuarios
-banco=Banco("127.0.0.1",6789)
+banco=Banco("10.20.30.3",6789)
 thread1=Thread(target=banco.udp_handler,args=())#crea el hilo para las conexiones udp
 thread1.start()#inicia el hilo para las conexiones udp
 banco.start()#inicia el banco
