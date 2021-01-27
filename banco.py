@@ -89,7 +89,7 @@ class Banco:
             conn.send("Ingrese la contrasena\n")
             contrasena= conn.recv(1024)
             print contrasena
-            if contrasena == self.db["Contrasenas"][self.index]:#revisa la contraseña sea valida
+            if contrasena == self.db["Contrasenas"][self.index]:#revisa la contrasena sea valida
                 conn.send("Ingreso Exitoso")
                 ok=conn.recv(40)
                 print ok

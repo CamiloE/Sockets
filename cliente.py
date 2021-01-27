@@ -76,7 +76,7 @@ class Cliente:
             pasw=input("Contrasena: ")
             self.c.send(str(pasw))
             conf=self.c.recv(52)
-            if conf=="Ingreso Exitoso":#Confirma la contraseña
+            if conf=="Ingreso Exitoso":#Confirma la contrasena
                 self.c.send("OK")
                 print conf
                 conectado=True
