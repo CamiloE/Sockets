@@ -10,30 +10,31 @@ class Banco:
         self.db={"Nombres":["camilo","alexandra","andres"],
         "NoCuenta":["1111","2222", "3333"],
         "Contrasenas":["pass1","pass2","pass3"], 
-        "Saldo" : [405000,405000,405000]}
-        self.ban=False
+        "Saldo" : [405000,405000,405000]}#base de datos que contiene la info de los clientes
+        self.ban=False#bandera para usarla en el manejador de conexiones
 
         self.tcpserver=socket(AF_INET,SOCK_STREAM)
         self.udpserver=socket(AF_INET,SOCK_DGRAM)
     def start(self):
         try:
             self.tcpserver.bind((self.ip,self.puerto))
-            #self.tcpserver.listen(5)
         except:
             print "puerto ocupado o INBOX equivocado"
             self.tcpserver.close()
-            os._exit(0)       #
+            os._exit(0)
         print "Esperando conexion..."
         while True:
             self.tcpserver.listen(5)
             conn,add=self.tcpserver.accept()#Acepta la conexion de un usuario
             print "Conexion desde ",add
-            thread=Thread(target=self.tcp_handler,args=(conn,add)) #Crea los subprocesos para los multiples clientes
-            thread.start()
+            thread=Thread(target=self.tcp_handler,args=(conn,add)) #Crea los subprocesos para los multiples clientes por tcp
+            thread.start()#inicia los hilos
 
-    def tcp_handler(self,conn,add):
+    def tcp_handler(self,conn,add):#Manejador de conexiones TCP
         bienvenida= "Bienvenido a su Banco, para nosotros es un gusto atenderlo\n"
         conn.send(bienvenida)
+        ok=conn.recv(50)
+        print ok
         self.autenticacion (conn,add)
         if self.ban==True:
             conn.send("\t\tLas opciones para interactuar con nosotros son las siguientes\n")
@@ -56,9 +57,9 @@ class Banco:
         print "Cerrando conexion"
         conn.close()
 
-    def udp_handler(self):
+    def udp_handler(self): #Manejador de conexiones udp
         try:
-            self.udpserver.bind((self.ip,5050))
+            self.udpserver.bind((self.ip,5050))#Inicializa los parametros de red
         except:
             print "puerto ocupado o INBOX equivocado"
             self.udpserver.close()
@@ -69,18 +70,16 @@ class Banco:
             print data
             cifrado1=data.split(":")[0]
             cifrado2=data.split(":")[1]
-            name=self.decifrado_letras(cifrado1,-5)
-            vlr=self.decifrado_numeros(cifrado2,-5)
-            #print name+":"+vlr
-            ans=self.debitar(name,int(vlr))
-            self.udpserver.sendto(ans,remote_host)
+            name=self.decifrado_letras(cifrado1,-5)#decifra el nombre de usuario
+            vlr=self.decifrado_numeros(cifrado2,-5)#decifra el valor
+            ans=self.debitar(name,int(vlr))#realiza el pago automatico, descontando el saldo
+            self.udpserver.sendto(ans,remote_host)#envia la respuesta a la licorera
 
-    def autenticacion(self,conn,add):
+    def autenticacion(self,conn,add):#realiza la autenticacion de los clientes
         conn.send("Ingrese Usuario")
         usuario=str(conn.recv(1024))
         print usuario
-        if usuario in self.db["Nombres"]:
-            print "entro al if"
+        if usuario in self.db["Nombres"]: #revisa que el usuario sea valido
             self.index= self.db["Nombres"].index(usuario)
             dir_user.append(add)
             user_list.append(usuario)
@@ -90,16 +89,16 @@ class Banco:
             conn.send("Ingrese la contrasena\n")
             contrasena= conn.recv(1024)
             print contrasena
-            if contrasena == self.db["Contrasenas"][self.index]:
+            if contrasena == self.db["Contrasenas"][self.index]:#revisa la contraseña sea valida
                 conn.send("Ingreso Exitoso")
                 ok=conn.recv(40)
                 print ok
                 self.ban=True
-            else:
+            else:#cierra la  conexion cuando la autenticacion falla
                 conn.send("Contrasena no Valida...cerrando conexion")
                 self.ban=False   
 
-        else:
+        else:#cierra la  conexion cuando la autenticacion falla
             conn.send("Usuario no valido...cerrando conexion")
             self.ban=False
 
@@ -108,14 +107,14 @@ class Banco:
         menu="1)SALDO: para conocer su saldo disponible\n"+"2)RETIRAR: para retirar dinero de su cuenta\n"+"3)CONSIGNAR: para retirar dinero de su cuenta\n"+"4)SALIR: para desconectarse del banco\n"
         conn.send(menu)   
     
-    def saldo(self,conn,add):
+    def saldo(self,conn,add):#FUncion para enviar al usuario su saldo
         i=dir_user.index(add)
         e=user_list[i]
         i2=self.db["Nombres"].index(e)
         conn.send("Su saldo es : \n"+ str(self.db["Saldo"][i2]))
 
     
-    def retirar(self,conn,add):
+    def retirar(self,conn,add):#funcion para darle dinero al usuario
         i=dir_user.index(add)
         e=user_list[i]
         i2=self.db["Nombres"].index(e)
@@ -127,7 +126,7 @@ class Banco:
             self.db["Saldo"][i2] =  self.db["Saldo"][i2] - valor
             conn.send("Dinero retirado")
         
-    def consignar(self,conn,add):
+    def consignar(self,conn,add):#FUNCION para consignar dinero en la cuenta
         i=dir_user.index(add)
         e=user_list[i]
         i2=self.db["Nombres"].index(e)
@@ -138,17 +137,17 @@ class Banco:
         else:
             self.db["Saldo"][i2] =  self.db["Saldo"][i2] + consig
             conn.send("Dinero consignado")
-    def decifrado_letras(self,text,n):
+    def decifrado_letras(self,text,n): #desencrippta el ususario
         intab=string.ascii_lowercase
         outrab = intab[ n % 26:] + intab[:n%26]
         trantab = string.maketrans(intab,outrab)
         return text.translate(trantab)
-    def decifrado_numeros(self,text,n):
+    def decifrado_numeros(self,text,n): #desencrippta el valor
         intab=string.digits
         outrab = intab[ n % 10:] + intab[:n%10]
         trantab = string.maketrans(intab,outrab)
         return text.translate(trantab)
-    def debitar(self,name,vlr):
+    def debitar(self,name,vlr): #Verifica el saldo para hacer el pago
         i=self.db["Nombres"].index(name)
         if self.db["Saldo"][i]>=vlr:
             self.db["Saldo"][i]=self.db["Saldo"][i]-vlr
@@ -157,9 +156,9 @@ class Banco:
             return "ERROR"
 
 
-user_list=[]
-dir_user=[]
+user_list=[] #lista de usuarios conectados
+dir_user=[] #lista con ip y puerto de los usuarios
 banco=Banco("127.0.0.1",6789)
-thread1=Thread(target=banco.udp_handler,args=())
-thread1.start()
-banco.start()
+thread1=Thread(target=banco.udp_handler,args=())#crea el hilo para las conexiones udp
+thread1.start()#inicia el hilo para las conexiones udp
+banco.start()#inicia el banco

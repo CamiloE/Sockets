@@ -14,8 +14,10 @@ class Cliente:
         self.c.send(self.nombre)
         bienvenida=self.c.recv(1024)
         print bienvenida
+        self.c.send("OK")
         segundo=self.c.recv(1024)
         print segundo
+        self.c.send("OK")
         opciones=self.c.recv(1024)
         print opciones
         while True:
@@ -60,6 +62,7 @@ class Cliente:
         self.c.connect(("127.0.0.1",6789))
         bienvenida=self.c.recv(1024)
         print bienvenida
+        self.c.send("OK")
         segundo=self.c.recv(1024)
         print segundo
         user=input()
@@ -140,4 +143,3 @@ while True:
         andres.conectar_licorera()
     elif opcion==2:
         andres.conectar_banco()
-        

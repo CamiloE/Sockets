@@ -10,12 +10,16 @@ class MiLicorera:
                 "codigo":[1,2,3,4,5],
                     "precio":[40000,80000,125000,95000,65000],
                     "cantidad":[5,5,5,5,5],
-                    "procedencia":["Colombia","Colombia","Escocia","Chile","Rusia"]}#Base de datos con la informacion de los licores
+                    "procedencia":[".co",".co",".uk",".cl",".ru"]}#Base de datos con la informacion de los licores
         self.tcpserver=socket(AF_INET,SOCK_STREAM)#Creacion de un servidor TCP 
     def handle(self,conn,add):#Funcion del manejador de las solicitudes de los clientes
         bienvenida= "Bienvenido a LiquoStore, para nosotros es un gusto atenderlo\n"
         conn.send(bienvenida)
+        ok=conn.recv(50)
+        print ok
         conn.send("\t\tLas opciones para interactuar con nosotros son las siguientes\n")
+        ok=conn.recv(50)
+        print ok
         self.opciones(conn)
         conectado=True
         while conectado:
@@ -25,7 +29,6 @@ class MiLicorera:
                 index=dir_user.index(add)
                 user_list.pop(index)
                 dir_user.remove(add)
-                #conn.close()
                 break
             elif datos=="MOSTRAR":
                 self.mostrar(conn)
@@ -105,31 +108,31 @@ class MiLicorera:
         for user in user_list:
             lista=lista+"-> "+user+"\n"
         conn.send(lista)
-    def conectar_banco(self,add,n):
+    def conectar_banco(self,add,n):#Funcion para conectar con el banco para el pago automatico
         c=socket(AF_INET,SOCK_DGRAM)#Crea una conexion UDP para realizar el pago con el banco
         i=dir_user.index(add)
         name=user_list[i]
         vlr=str(n)
-        cifrado1=self.cifrado_letras(name,5)
-        cifrado2=self.cifrado_numeros(vlr,5)
+        cifrado1=self.cifrado_letras(name,5) #cifra el nombre del usuario
+        cifrado2=self.cifrado_numeros(vlr,5) #cifra el precio
         req=cifrado1+":"+cifrado2
         print req
-        c.sendto(req,("127.0.0.1",5050))
+        c.sendto(req,("127.0.0.1",5050)) #envia el cifrado al banco
         ans, remoto=c.recvfrom(1024)#Recibe la respuesta del banco
         c.close()#Cierra la conexion con el banco
-        return ans
-    def cifrado_letras(self,text,n):
+        return ans #retorna la respuesta del banco
+    def cifrado_letras(self,text,n): #FUncion que cifra las letras con algoritmo cesar
         intab=string.ascii_lowercase
         outrab = intab[ n % 26:] + intab[:n%26]
         trantab = string.maketrans(intab,outrab)
         return text.translate(trantab)
-    def cifrado_numeros(self,text,n):
+    def cifrado_numeros(self,text,n): #FUncion que cifra los numeros con algoritmo cesar
         intab=string.digits
         outrab = intab[ n % 10:] + intab[:n%10]
         trantab = string.maketrans(intab,outrab)
         return text.translate(trantab)
 
 user_list=[]#Lista con los usuarios conectados
-dir_user=[]
+dir_user=[]#lista con las ips y puertos del cliente.
 licorera=MiLicorera("127.0.0.1",1234)
 licorera.start()
